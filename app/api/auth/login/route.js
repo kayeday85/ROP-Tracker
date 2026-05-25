@@ -1,28 +1,16 @@
 import { NextResponse } from "next/server";
-import { connectDB } from "@/lib/db";
 import User from "@/models/User";
-import bcrypt from "bcryptjs";
+import connectDB from "@/lib/db";
 
 export async function POST(req) {
   await connectDB();
 
-  const { email, password } = await req.json();
+  const { name, email, password } = await req.json();
 
   try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
+    const user = await User.create({ name, email, password });
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) {
-      return NextResponse.json({ message: "Invalid password" }, { status: 401 });
-    }
-
-    const res = NextResponse.json(
-      { message: "Login successful", user },
-      { status: 200 }
-    );
+    const res = NextResponse.json({ message: "User registered", user }, { status: 201 });
 
     // CORS HEADERS
     res.headers.set("Access-Control-Allow-Origin", "*");
@@ -30,8 +18,8 @@ export async function POST(req) {
     res.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
     return res;
-  } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
 
