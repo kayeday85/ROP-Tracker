@@ -6,15 +6,22 @@ import bcrypt from "bcryptjs";
 export async function POST(req) {
   await connectDB();
 
-  const { name, email, password } = await req.json();
-  const passwordHash = await bcrypt.hash(password, 10);
+  const { email, password } = await req.json();
 
   try {
-    const user = await User.create({ name, email, passwordHash });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!isMatch) {
+      return NextResponse.json({ message: "Invalid password" }, { status: 401 });
+    }
 
     const res = NextResponse.json(
-      { message: "User created", user },
-      { status: 201 }
+      { message: "Login successful", user },
+      { status: 200 }
     );
 
     // CORS HEADERS
