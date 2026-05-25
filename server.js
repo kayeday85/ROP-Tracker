@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
+console.log("MONGODB_URI from env:", process.env.MONGODB_URI);
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
